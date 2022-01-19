@@ -2,7 +2,10 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_toastr/flutter_toastr.dart';
+import 'package:happy_new_year/file_utils.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main(List<String> args) {
   runApp(
@@ -27,6 +30,7 @@ class _IndexPageState extends State<IndexPage> {
   late TextEditingController _controller_left;
   late TextEditingController _controller_top;
   late TextEditingController _controller_right;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,7 +94,7 @@ class _IndexPageState extends State<IndexPage> {
             ),
             ElevatedButton(
               child: const Text("生成"),
-              onPressed: () => getDownlaodUrl(
+              onPressed: () => downloadFile(
                 _controller_top.text,
                 _controller_left.text,
                 _controller_right.text,
@@ -119,18 +123,36 @@ class _IndexPageState extends State<IndexPage> {
     super.dispose();
   }
 
-  getDownlaodUrl(String _top, String _left, String _right) async {
+  downloadFile(String _top, String _left, String _right) async {
+    Directory? _downloadDir = await getSaveDirectory();
+    if (_downloadDir == null) {
+      FlutterToastr.show("请授予存储权限用来保存文件！", context);
+      openAppSettings();
+      return;
+    }
     if (_top.isEmpty || _left.isEmpty || _right.isEmpty) {
       return;
     }
-    Directory tmpDir = await getTemporaryDirectory();
-    debugPrint(tmpDir.absolute.path);
     Response response;
     Dio dio = Dio();
-    dio.options.baseUrl = 'http://127.0.0.1:5000';
-    response = await dio.download(
-        "http://127.0.0.1:5000/generate?top=$_top&left=$_left&right=$_right",
-        "$tmpDir/$_top.zip");
-    debugPrint(response.data);
+    // dio.options.baseUrl = 'https://2022.catcompany.cn/';
+    String _saveDir = "${_downloadDir.absolute.path}/$_top.zip";
+    if (await File(_saveDir).exists()) {
+      await File(_saveDir).delete();
+    }
+    try {
+      response = await dio.download(
+          "http://2022.catcompany.cn/generate?top=$_top&left=$_left&right=$_right",
+          _saveDir);
+    } catch (e) {
+      FlutterToastr.show("请求失败:\n$e", context);
+      return;
+    }
+    if (Platform.isAndroid) {
+      unzip(_saveDir);
+      FlutterToastr.show("已保存在相册", context);
+    } else {
+      FlutterToastr.show("已保存在$_saveDir", context);
+    }
   }
 }

@@ -1,16 +1,12 @@
 # happy_new_year
 
-A new Flutter project.
+A new Flutter project for build couplet.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+This project is a flutter project.
 
-A few resources to get you started if this is your first Flutter project:
+- clone or download source
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- run `flutter run` and everything will be ok, if you want to run app in target device,
+you can append `-d <device>`
